@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">捡球车控</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="ip">地址：</string>
+    <string name="port">端口：</string>
+    <string name="statues">状态：</string>
+    <string name="edit1">请输入IP地址</string>
+    <string name="edit2">请输入端口号</string>
+    <string name="connect">连接</string>
+    <string name="disconnect">断开</string>
+    <string name="forward"></string>
+    <string name="back"></string>
+    <string name="left"></string>
+    <string name="right"></string>
+    <string name="pick"></string>
+</resources>

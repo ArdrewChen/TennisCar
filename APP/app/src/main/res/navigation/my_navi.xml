@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/my_navi"
+    app:startDestination="@id/home2">
+
+    <fragment
+        android:id="@+id/control"
+        android:name="com.example.summer3.Control"
+        android:label="Control"
+        tools:layout="@layout/fragment_control">
+        <action
+            android:id="@+id/action_control_to_home2"
+            app:destination="@id/home2"
+            app:enterAnim="@anim/nav_default_pop_enter_anim"
+            app:exitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/home2"
+        android:name="com.example.summer3.Home"
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_home2_to_control"
+            app:destination="@id/control"
+            app:enterAnim="@anim/nav_default_enter_anim" />
+    </fragment>
+</navigation>

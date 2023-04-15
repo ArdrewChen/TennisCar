@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Summer3.iml" filepath="$PROJECT_DIR$/.idea/modules/Summer3.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Summer3.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Summer3.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Summer3.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Summer3.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Summer3.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Summer3.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Summer3.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Summer3.app.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/Summer3.core.iml" filepath="$PROJECT_DIR$/.idea/modules/core/Summer3.core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/Summer3.core.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/core/Summer3.core.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/Summer3.core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/Summer3.core.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/Summer3.core.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/core/Summer3.core.unitTest.iml" />
+    </modules>
+  </component>
+</project>

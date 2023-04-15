@@ -1,0 +1,27 @@
+--cpu Cortex-M3
+"tenniscar\startup_stm32f103xb.o"
+"tenniscar\main.o"
+"tenniscar\gpio.o"
+"tenniscar\tim.o"
+"tenniscar\usart.o"
+"tenniscar\stm32f1xx_it.o"
+"tenniscar\stm32f1xx_hal_msp.o"
+"tenniscar\stm32f1xx_hal_gpio_ex.o"
+"tenniscar\stm32f1xx_hal_tim.o"
+"tenniscar\stm32f1xx_hal_tim_ex.o"
+"tenniscar\stm32f1xx_hal.o"
+"tenniscar\stm32f1xx_hal_rcc.o"
+"tenniscar\stm32f1xx_hal_rcc_ex.o"
+"tenniscar\stm32f1xx_hal_gpio.o"
+"tenniscar\stm32f1xx_hal_dma.o"
+"tenniscar\stm32f1xx_hal_cortex.o"
+"tenniscar\stm32f1xx_hal_pwr.o"
+"tenniscar\stm32f1xx_hal_flash.o"
+"tenniscar\stm32f1xx_hal_flash_ex.o"
+"tenniscar\stm32f1xx_hal_exti.o"
+"tenniscar\stm32f1xx_hal_uart.o"
+"tenniscar\system_stm32f1xx.o"
+--strict --scatter "TennisCar\TennisCar.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "TennisCar.map" -o TennisCar\TennisCar.axf

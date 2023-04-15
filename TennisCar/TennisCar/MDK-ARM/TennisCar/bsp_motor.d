@@ -1,0 +1,10 @@
+tenniscar\bsp_motor.o: bsp_motor.c
+tenniscar\bsp_motor.o: bsp_motor.h
+tenniscar\bsp_motor.o: E:\MDK5.36\Packs\Keil\STM32F1xx_DFP\2.3.0\Device\Include\stm32f10x.h
+tenniscar\bsp_motor.o: .\RTE\_TennisCar\RTE_Components.h
+tenniscar\bsp_motor.o: ../Drivers/CMSIS/Include/core_cm3.h
+tenniscar\bsp_motor.o: E:\MDK5.36\ARM\ARMCC\Bin\..\include\stdint.h
+tenniscar\bsp_motor.o: ../Drivers/CMSIS/Include/cmsis_version.h
+tenniscar\bsp_motor.o: ../Drivers/CMSIS/Include/cmsis_compiler.h
+tenniscar\bsp_motor.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
+tenniscar\bsp_motor.o: E:\MDK5.36\Packs\Keil\STM32F1xx_DFP\2.3.0\Device\Include\system_stm32f10x.h
