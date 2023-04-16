@@ -52,6 +52,15 @@ uint8_t RxBuffer[3];
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
+// 小车四向运动
+void Car_Go(void );
+void Car_Back(void);
+void Car_Left(void);
+void Car_Right(void);
+void Car_Stop(void);
+void Car_Turn(void);
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -90,9 +99,12 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_TIM4_Init();
-  HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
   /* USER CODE BEGIN 2 */
 
+  HAL_TIM_Base_Start_IT(&htim4);//开启TIM2定时器中断
+  HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);//开启PWM波
+  HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);//开启PWM波
+//  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_RESET);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -102,10 +114,40 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+     while(1){
       if(HAL_UART_Receive(&huart2,RxBuffer,3,100)==HAL_OK)
-      {
-      HAL_UART_Transmit(&huart1,RxBuffer,3,100);
-      }
+    {
+    break;
+    }
+  }
+           if(RxBuffer[0]=='F'){
+            Car_Go();
+//             HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_SET); 
+            HAL_Delay(100);
+         }
+          else if(RxBuffer[0]=='B'){
+            Car_Back();
+            HAL_Delay(100);
+         }
+          else if(RxBuffer[0]=='L'){
+            Car_Left();
+            HAL_Delay(100);
+         }
+          else if(RxBuffer[0]=='R'){
+            Car_Right();
+            HAL_Delay(100);
+         }
+          else if(RxBuffer[0]=='P'){
+            Car_Turn();
+            HAL_Delay(100);
+         }
+          else{
+           Car_Stop();
+          }
+ 
+
+
+    
   }
   /* USER CODE END 3 */
 }
@@ -149,7 +191,57 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)//回调函数
+{
+    uint16_t CRR=3600;
+    if(htim==&htim4)
+    {
+      __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,CRR);//(修改CCR值,改变占空比)
+      __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,CRR);
+    }
 
+}
+void Car_Go(void){
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_RESET); //SET输出高电平，RESET输出低电平
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_9,GPIO_PIN_SET);
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET); 
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_RESET);
+}
+
+void Car_Back(void){
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_SET); //SET输出高电平，RESET输出低电平
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_9,GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET); 
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_SET);
+}
+
+void Car_Left(void){
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_RESET); //SET输出高电平，RESET输出低电平
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_9,GPIO_PIN_SET);
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET); 
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_RESET);
+}
+
+void Car_Right(void){
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_RESET); //SET输出高电平，RESET输出低电平
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_9,GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET); 
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_RESET);
+}
+
+void Car_Stop(void){
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_RESET); //SET输出高电平，RESET输出低电平
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_9,GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET); 
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_RESET);
+}
+
+void Car_Turn(void){
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_RESET); //SET输出高电平，RESET输出低电平
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_9,GPIO_PIN_SET);
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET); 
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_SET);
+}
 /* USER CODE END 4 */
 
 /**
