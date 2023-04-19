@@ -138,7 +138,7 @@ int main(void)
             HAL_Delay(100);
          }
           else if(RxBuffer[0]=='P'){
-            Car_Turn();
+            Car_Stop();
             HAL_Delay(100);
          }
           else{

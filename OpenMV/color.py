@@ -4,13 +4,14 @@
 # 这个例子查找的颜色是深绿色
 
 import sensor, image, time
+from pyb import UART
 
 # 颜色追踪的例子，一定要控制环境的光，保持光线是稳定的。
-green_threshold   = (   0,   80,  -70,   -10,   -0,   30)
+green_threshold   = (37, 95, -62, -24, -25, 55)           #(42, 95, -46, 9, 32, 73)
 #设置绿色的阈值，括号里面的数值分别是L A B 的最大值和最小值（minL, maxL, minA,
 # maxA, minB, maxB），LAB的值在图像左侧三个坐标图中选取。如果是灰度图，则只需
 #设置（min, max）两个数字即可。
-
+uart = UART(3, 15200)
 sensor.reset() # 初始化摄像头
 sensor.set_pixformat(sensor.RGB565) # 格式为 RGB565.
 sensor.set_framesize(sensor.QQVGA) # 使用 QQVGA 速度快一些
@@ -23,27 +24,23 @@ clock = time.clock() # 追踪帧率
 while(True):
     clock.tick() # Track elapsed milliseconds between snapshots().
     img = sensor.snapshot() # 从感光芯片获得一张图像
+    img.median(1, percentile=0.5)   # 进行中值滤波
+    img.lens_corr(1.8)
+    for c in img.find_circles(threshold = 1700, x_margin = 10, y_margin = 10, r_margin = 10,r_min = 2, r_max = 100, r_step = 2):
+        if(c.r()>30):
+            continue
+        else:
+            #img.draw_circle(c.x(), c.y(), c.r(), color = (255, 0, 0))
+            area = (c.x()-c.r(), c.y()-c.r(), 2*c.r(), 2*c.r()) # 圆的外接矩形框
+            statistics = img.get_statistics(roi=area)#像素颜色统计
+            if 37<statistics.l_mode()<95 and -62<statistics.a_mode()<-14 and -25<statistics.b_mode()<55:#l_mode()，a_mode()，b_mode()是L通道，A通道，B通道的众数。
+                img.draw_rectangle(area, color = (255, 255, 255))
+                print(c.r())
+                data= str(c.x())+str(c.y())+str(c.r())
+                uart.write(data)
 
-    blobs = img.find_blobs([green_threshold])
-    #find_blobs(thresholds, invert=False, roi=Auto),thresholds为颜色阈值，
-    #是一个元组，需要用括号［ ］括起来。invert=1,反转颜色阈值，invert=False默认
-    #不反转。roi设置颜色识别的视野区域，roi是一个元组， roi = (x, y, w, h)，代表
-    #从左上顶点(x,y)开始的宽为w高为h的矩形区域，roi不设置的话默认为整个图像视野。
-    #这个函数返回一个列表，[0]代表识别到的目标颜色区域左上顶点的x坐标，［1］代表
-    #左上顶点y坐标，［2］代表目标区域的宽，［3］代表目标区域的高，［4］代表目标
-    #区域像素点的个数，［5］代表目标区域的中心点x坐标，［6］代表目标区域中心点y坐标，
-    #［7］代表目标颜色区域的旋转角度（是弧度值，浮点型，列表其他元素是整型），
-    #［8］代表与此目标区域交叉的目标个数，［9］代表颜色的编号（它可以用来分辨这个
-    #区域是用哪个颜色阈值threshold识别出来的）。
-    #if blobs:
-    ##如果找到了目标颜色
-        #for b in blobs:
-        ##迭代找到的目标颜色区域
-            # Draw a rect around the blob.
-            #img.draw_rectangle(b[0:4]) # rect
-            ##用矩形标记出目标颜色区域
-            #img.draw_cross(b[5], b[6]) # cx, cy
-            ##在目标颜色区域的中心画十字形标记
+            else:
+                continue
 
     print(clock.fps()) # 注意: 你的OpenMV连到电脑后帧率大概为原来的一半
     #如果断开电脑，帧率会增加
