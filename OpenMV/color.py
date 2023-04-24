@@ -21,26 +21,43 @@ sensor.set_auto_whitebal(False)
 #关闭白平衡。白平衡是默认开启的，在颜色识别中，一定要关闭白平衡。
 clock = time.clock() # 追踪帧率
 
+def find_max(blobs):
+    max_size=0
+    for blob in blobs:
+        if blob.pixels() > max_size:
+            max_blob=blob
+            max_size = blob.pixels()
+    return max_blob
+
 while(True):
     clock.tick() # Track elapsed milliseconds between snapshots().
     img = sensor.snapshot() # 从感光芯片获得一张图像
     img.median(1, percentile=0.5)   # 进行中值滤波
     img.lens_corr(1.8)
+    max_r=0
+    max_c=None
     for c in img.find_circles(threshold = 1700, x_margin = 10, y_margin = 10, r_margin = 10,r_min = 2, r_max = 100, r_step = 2):
         if(c.r()>30):
             continue
         else:
-            #img.draw_circle(c.x(), c.y(), c.r(), color = (255, 0, 0))
             area = (c.x()-c.r(), c.y()-c.r(), 2*c.r(), 2*c.r()) # 圆的外接矩形框
             statistics = img.get_statistics(roi=area)#像素颜色统计
             if 37<statistics.l_mode()<95 and -62<statistics.a_mode()<-14 and -25<statistics.b_mode()<55:#l_mode()，a_mode()，b_mode()是L通道，A通道，B通道的众数。
                 img.draw_rectangle(area, color = (255, 255, 255))
-                print(c.r())
-                data= str(c.x())+str(c.y())+str(c.r())
-                uart.write(data)
-
+                if c.r()> max_r:
+                    max_r=c.r()
+                    max_c=c
             else:
-                continue
+                 continue
+    if max_c:
+         img.draw_circle(max_c.x(), max_c.y(), max_c.r(), color = (255, 0, 0))
+         print(max_c.r())
+         data= str(c.x())+str(c.y())+str(c.r())
+         max_c=None
+         uart.write(data)
+    else:
+        print("NOT FOUND")
+        uart.write("NOT")
 
     print(clock.fps()) # 注意: 你的OpenMV连到电脑后帧率大概为原来的一半
     #如果断开电脑，帧率会增加
