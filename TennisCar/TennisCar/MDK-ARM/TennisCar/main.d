@@ -31,3 +31,4 @@ tenniscar\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 tenniscar\main.o: ../Core/Inc/tim.h
 tenniscar\main.o: ../Core/Inc/usart.h
 tenniscar\main.o: ../Core/Inc/gpio.h
+tenniscar\main.o: E:\MDK5.36\ARM\ARMCC\Bin\..\include\stdlib.h

@@ -5,13 +5,10 @@
 
 import sensor, image, time
 from pyb import UART
+from pid import PID
 
-# 颜色追踪的例子，一定要控制环境的光，保持光线是稳定的。
-green_threshold   = (37, 95, -62, -24, -25, 55)           #(42, 95, -46, 9, 32, 73)
-#设置绿色的阈值，括号里面的数值分别是L A B 的最大值和最小值（minL, maxL, minA,
-# maxA, minB, maxB），LAB的值在图像左侧三个坐标图中选取。如果是灰度图，则只需
-#设置（min, max）两个数字即可。
-uart = UART(3, 15200)
+
+uart = UART(3, 115200)
 sensor.reset() # 初始化摄像头
 sensor.set_pixformat(sensor.RGB565) # 格式为 RGB565.
 sensor.set_framesize(sensor.QQVGA) # 使用 QQVGA 速度快一些
@@ -20,14 +17,9 @@ sensor.set_auto_gain(False) # 关闭自动自动增益。默认开启的，在�
 sensor.set_auto_whitebal(False)
 #关闭白平衡。白平衡是默认开启的，在颜色识别中，一定要关闭白平衡。
 clock = time.clock() # 追踪帧率
-
-def find_max(blobs):
-    max_size=0
-    for blob in blobs:
-        if blob.pixels() > max_size:
-            max_blob=blob
-            max_size = blob.pixels()
-    return max_blob
+x_pid = PID(p=0.5, i=1, imax=100)
+h_pid = PID(p=0.05, i=0.1, imax=50)
+uart_buf=[]
 
 while(True):
     clock.tick() # Track elapsed milliseconds between snapshots().
@@ -51,13 +43,17 @@ while(True):
                  continue
     if max_c:
          img.draw_circle(max_c.x(), max_c.y(), max_c.r(), color = (255, 0, 0))
-         print(max_c.r())
-         data= str(c.x())+str(c.y())+str(c.r())
-         max_c=None
-         uart.write(data)
+         x_error = max_c.x()-img.width()/2   # 调节小车左右
+         r_error = 19-max_c.r()             # 调节小车前后
+         x_output=x_pid.get_pid(x_error,1)
+         r_output=h_pid.get_pid(r_error,1)
+         print("左右：%d,前后：%d"%(x_output,r_output))
+         uart_buf =bytearray([0x6B,int(x_output),int(r_output),0x6A])
+         uart.write(uart_buf)
     else:
         print("NOT FOUND")
-        uart.write("NOT")
+        uart_buf =bytearray([0x6A,0,0,0x6C])
+        uart.write(uart_buf)
 
     print(clock.fps()) # 注意: 你的OpenMV连到电脑后帧率大概为原来的一半
     #如果断开电脑，帧率会增加

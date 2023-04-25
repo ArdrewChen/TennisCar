@@ -22,6 +22,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "stdlib.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -46,6 +47,14 @@
 
 /* USER CODE BEGIN PV */
 uint8_t RxBuffer[3];
+uint16_t Flag ;  //标志位
+uint8_t OpenMV[4]; //openmv模块接收
+uint8_t RxFlag;     // openmv模块接收标志位 
+float PID;
+uint16_t Left_Speed;
+uint16_t Right_Speed ;
+uint16_t stop =0;
+uint16_t cout;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -59,8 +68,10 @@ void Car_Left(void);
 void Car_Right(void);
 void Car_Stop(void);
 void Car_Turn(void);
-
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
+void Car_advance(void);
+void TIM_SetCompare1(TIM_TypeDef *, int);
+void Car_Run(int,int);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -99,11 +110,14 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_TIM4_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_TIM_Base_Start_IT(&htim4);//开启TIM2定时器中断
   HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);//开启PWM波
   HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);//开启PWM波
+  HAL_UART_Receive_IT(&huart3,(uint8_t*)OpenMV,4); //使能接收中断
+  Flag = 0;        // 0表示运行测试代码，1表示正式运行
 //  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_RESET);
   /* USER CODE END 2 */
 
@@ -114,38 +128,70 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-     while(1){
-      if(HAL_UART_Receive(&huart2,RxBuffer,3,100)==HAL_OK)
-    {
-    break;
-    }
-  }
-           if(RxBuffer[0]=='F'){
-            Car_Go();
+    if(Flag==1)
+        {
+        while(1)
+        {
+            if(HAL_UART_Receive(&huart2,RxBuffer,3,100)==HAL_OK)
+            {
+                break;
+            }
+        }
+           if(RxBuffer[0]=='F')
+              {
+                Car_Go();
 //             HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_SET); 
-            HAL_Delay(100);
-         }
-          else if(RxBuffer[0]=='B'){
-            Car_Back();
-            HAL_Delay(100);
-         }
-          else if(RxBuffer[0]=='L'){
-            Car_Left();
-            HAL_Delay(100);
-         }
-          else if(RxBuffer[0]=='R'){
-            Car_Right();
-            HAL_Delay(100);
-         }
-          else if(RxBuffer[0]=='P'){
-            Car_Stop();
-            HAL_Delay(100);
-         }
-          else{
-           Car_Stop();
-          }
+                HAL_Delay(100);
+              }
+          else if(RxBuffer[0]=='B')
+              {
+                Car_Back();
+                HAL_Delay(100);
+              }
+          else if(RxBuffer[0]=='L')
+              {
+                Car_Left();
+                HAL_Delay(100);
+              }
+          else if(RxBuffer[0]=='R')
+              {
+                Car_Right();
+                HAL_Delay(100);
+              }
+          else if(RxBuffer[0]=='P')
+              {
+                Car_Stop();
+                HAL_Delay(100);
+              }
+          else
+              {
+               Car_Stop();
+              }
  
-
+      }
+    else //测试代码
+        {
+            if (RxFlag)
+            {
+                RxFlag = 0;
+                if (OpenMV[0] == 0x6B && OpenMV[3] == 0x6A)
+                {
+                    Right_Speed = -OpenMV[1]-OpenMV[2];
+                    Left_Speed = OpenMV[1]-OpenMV[2];
+                    Car_Run(Left_Speed,Right_Speed);
+                    cout = 0 ;
+                }
+                else if (OpenMV[0] == 0x6A && OpenMV[3] == 0x6C)
+                {   
+                    cout = cout +1;
+                    if (cout>15)
+                    {
+                    Car_Turn();
+                    }
+                }
+            }
+         
+        }
 
     
   }
@@ -193,11 +239,14 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)//回调函数
 {
-    uint16_t CRR=3600;
-    if(htim==&htim4)
-    {
-      __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,CRR);//(修改CCR值,改变占空比)
-      __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,CRR);
+    int PID;
+    if (Flag==1){
+        PID = 1800 ;
+        if(htim==&htim4)
+        {
+            __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,PID);//(修改PID值,改变占空比)
+            __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,PID);
+        }
     }
 
 }
@@ -242,6 +291,45 @@ void Car_Turn(void){
       HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET); 
       HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_SET);
 }
+void Car_Run(left_speed, right_speed){
+      if(left_speed>0)
+      {
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_RESET); //SET输出高电平，RESET输出低电平
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_9,GPIO_PIN_SET);
+      }
+      else
+      {
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_SET); //SET输出高电平，RESET输出低电平
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_9,GPIO_PIN_RESET);
+      }
+      left_speed = abs(left_speed);
+      __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,left_speed);
+      left_speed =0 ;
+      if(right_speed>0)
+      {
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET); 
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_RESET);
+      }
+      else
+      {
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET); 
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_SET);
+      }
+      right_speed = abs(right_speed);
+      __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,right_speed);
+      right_speed = 0 ;
+
+}
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+        if(huart ->Instance == USART3)
+        {
+            RxFlag = 1;
+            HAL_UART_Receive_IT(&huart3,(uint8_t*)OpenMV, 4);
+        }
+
+}
+
 /* USER CODE END 4 */
 
 /**
