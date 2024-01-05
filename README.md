@@ -58,11 +58,11 @@ Android Studio
 
 ## 实现效果
 
-#### 识别效果
+### 识别效果
 
 <img title="" src="images/识别效果.png" alt="" data-align="center">
 
-#### 操作效果
+### 操作效果
 
 #### 自动寻球模式
 
